@@ -107,14 +107,15 @@ class Server(RemoteServer):
         log_file = options.get('log_file', 'server.log')
         retry_sleep = options.get('retry_sleep', 0.5)
         retry_count = options.get('retry_count', 60)
-        new_process = options.get('new_process', True)
         log_path_name = os.path.join(log_path, log_file)
         self.log_file = open(log_path_name, 'w')
 
-        if new_process:
-            self.process = subprocess.Popen(self.command,
-                                            stdout=self.log_file,
-                                            stderr=subprocess.STDOUT)
+        if options.get('new_process', True) is not True:
+            return
+
+        self.process = subprocess.Popen(self.command,
+                                        stdout=self.log_file,
+                                        stderr=subprocess.STDOUT)
         count = 0
         while not self._is_listening():
             if self.process.poll():
@@ -134,7 +135,7 @@ class Server(RemoteServer):
         """
         This will stop the process running the proxy
         """
-        if self.process.poll() is not None:
+        if self.process is None or self.process.poll() is not None:
             return
 
         try:
