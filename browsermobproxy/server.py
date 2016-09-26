@@ -96,7 +96,10 @@ class Server(RemoteServer):
         interact with it
 
         :param dict options: Dictionary that can hold the path and filename
-            of the log file with resp. keys of `log_path` and `log_file`
+            of the log file with resp, retry interval time and count,
+            start new browsermob proxy process or not.
+            keys of `log_path`, `log_file`, `retry_sleep', `retry_count`
+            and `new_process`
         """
         if options is None:
             options = {}
@@ -104,12 +107,14 @@ class Server(RemoteServer):
         log_file = options.get('log_file', 'server.log')
         retry_sleep = options.get('retry_sleep', 0.5)
         retry_count = options.get('retry_count', 60)
+        new_process = options.get('new_process', True)
         log_path_name = os.path.join(log_path, log_file)
         self.log_file = open(log_path_name, 'w')
 
-        self.process = subprocess.Popen(self.command,
-                                        stdout=self.log_file,
-                                        stderr=subprocess.STDOUT)
+        if new_process:
+            self.process = subprocess.Popen(self.command,
+                                            stdout=self.log_file,
+                                            stderr=subprocess.STDOUT)
         count = 0
         while not self._is_listening():
             if self.process.poll():
